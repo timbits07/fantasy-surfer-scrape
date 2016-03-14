@@ -1,6 +1,7 @@
 <?php 
+//http://www.the-art-of-web.com/php/html-xpath-query/
 
-include_once "values.php";
+include_once "creds/values.php";
 
 //login form action url
 $url="http://fantasy.surfermag.com/login/"; 
@@ -36,22 +37,55 @@ $html = curl_exec($ch);
 
 curl_close($ch);
 
-preg_match_all(
-    '/<div class="memhead-user">(.*?)<\/div>/s',
-    $html,
-    $teams, // will contain the article data
-    PREG_SET_ORDER // formats data into an array of posts
-);
+$dom = new DOMDocument();
+@$dom->loadHTML($html);
 
-foreach ($teams as $team) {
-    preg_match_all(
-	    '/<span>(.*?)<\/span>/s',
-	    $team[0],
-	    $name, // will contain the article data
-	    PREG_SET_ORDER // formats data into an array of posts
-		);
+$xpath = new DOMXpath($dom);
+$teams = $xpath->query('//div[@class="memhead-user"]');
 
-		echo "<p>" . $name[0][1] . "</p>";
+$teams_info = array();
+foreach($teams as $team) {
+  $arr = $team->getElementsByTagName("a");
+  foreach($arr as $item) {
+    $href =  $item->getAttribute("href");
+    $text = trim(preg_replace("/[\r\n]+/", " ", $item->nodeValue));
+    array_push($teams_info, array(
+      'href' => $href,
+      'name' => $text
+    ));
+  }
 }
+
+print_r($teams_info);
+
+
+// Defining the basic cURL function
+function curl($url) {
+    $ch = curl_init();  // Initialising cURL
+    $ckfile = "cookie.txt";
+    curl_setopt($ch, CURLOPT_COOKIEFILE, $ckfile);
+    curl_setopt($ch, CURLOPT_URL, $url);    // Setting cURL's URL option with the $url variable passed into the function
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE); // Setting cURL's option to return the webpage data
+    $data = curl_exec($ch); // Executing the cURL request and assigning the returned data to the $data variable
+    curl_close($ch);    // Closing cURL
+    return $data;   // Returning the data from the function
+}
+
+$scraped_website = curl("http://fantasy.surfermag.com/team/mens/?user=126731");
+$dom2 = new DOMDocument();
+@$dom2->loadHTML($scraped_website);
+$xpath2 = new DOMXpath($dom2);
+$teamMembers = $xpath2->query('//ul[@id="DashboardLineup"]');
+print_r($teamMembers);
+// foreach ($teamMembers as $surfer) {
+//   echo "<p>" . $surfer->getAttribute('alt') . "</p>";
+// }
+
+// $teamMembers = $xpath2->query('//div[@class="history-surfer"]');
+// //print_r($teamMembers);
+// foreach($teamMembers as $surfer) {
+//   $arr = $surfer->getElementsByTagName("span")->item(0)->nodeValue;
+//   echo "<p>" . $arr . "</p>";
+// }
 
 ?>
