@@ -51,12 +51,13 @@ foreach($teams as $team) {
     $text = trim(preg_replace("/[\r\n]+/", " ", $item->nodeValue));
     array_push($teams_info, array(
       'href' => $href,
-      'name' => $text
+      'name' => $text,
+      'team' => array()
     ));
   }
 }
 
-print_r($teams_info);
+//print_r($teams_info);
 
 
 // Defining the basic cURL function
@@ -71,21 +72,29 @@ function curl($url) {
     return $data;   // Returning the data from the function
 }
 
-$scraped_website = curl("http://fantasy.surfermag.com/team/mens/?user=126731");
-$dom2 = new DOMDocument();
-@$dom2->loadHTML($scraped_website);
-$xpath2 = new DOMXpath($dom2);
-$teamMembers = $xpath2->query('//ul[@id="DashboardLineup"]');
-print_r($teamMembers);
-// foreach ($teamMembers as $surfer) {
-//   echo "<p>" . $surfer->getAttribute('alt') . "</p>";
-// }
+foreach ($teams_info as &$team) {
+  //echo "<pre>".$team['name']. " " . $team['href'] . "</pre>";
+  $scraped_website = curl("http://fantasy.surfermag.com" . $team['href']);
+  $dom2 = new DOMDocument();
+  @$dom2->loadHTML($scraped_website);
+  $xpath2 = new DOMXpath($dom2);
+  $eventNumber = 1;
+  $eventSurfers = $xpath2->query('//div[@class="history-row"][' . $eventNumber . ']//div[@class="history-surfer"]');
+  //print_r($eventSurfers);
+  foreach($eventSurfers as $surfer) {
+    $arr = $surfer->getElementsByTagName("span")->item(0)->nodeValue;
+    array_push($team['team'], $arr);
+  }
+}
 
-// $teamMembers = $xpath2->query('//div[@class="history-surfer"]');
-// //print_r($teamMembers);
-// foreach($teamMembers as $surfer) {
-//   $arr = $surfer->getElementsByTagName("span")->item(0)->nodeValue;
-//   echo "<p>" . $arr . "</p>";
-// }
+print_r($teams_info);
+  
+
+
+
+
+
+
+
 
 ?>
