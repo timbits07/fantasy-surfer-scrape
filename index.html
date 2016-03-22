@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Fantasy Surfer Teams</title>
+	<style type="text/css">
+		#loader {
+			display: none;
+			padding-top: 20px;
+		}
+	</style>
+</head>
+<body>
+	<form>
+		<select id="event">
+			<option value="">Select Event</option>
+			<option value="1">Quik Pro Gold Coast</option>
+			<option value="2">Rip Curl Bells Beach</option>
+			<option value="3">Drug Aware Margaret River Pro</option>
+			<option value="4">Oi Rio Pro</option>
+			<option value="5">Fiji Pro</option>
+			<option value="6">J-Bay Open</option>
+			<option value="7">Billabong Pro Tahiti</option>
+			<option value="8">Hurley Pro at Trestles</option>
+			<option value="9">Quiksilver Pro France</option>
+			<option value="10">Moche Rip Curl Pro Portugal</option>
+			<option value="11">Billabong Pipe Masters</option>
+		</select>
+		<input type="button" value="Get Teams" onclick="getSurfers()"/>
+	</form>
+	<div id="loader">
+		<img src="L9Ph4KP.gif"/>
+		<h3>Enjoy this endless barrel while I fetch the fantasy teams.</h3>
+	</div>
+	<div id="teams"></div>
+<script type="text/javascript">
+
+	function showTeams(str) {
+	  if (str=="") {
+	    return;
+	  } 
+	  if (window.XMLHttpRequest) {
+	    // code for IE7+, Firefox, Chrome, Opera, Safari
+	    xmlhttp=new XMLHttpRequest();
+	  } else {  // code for IE6, IE5
+	    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	  }
+	  xmlhttp.onreadystatechange=function() {
+	    if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+	    	document.getElementById("loader").style.display = "none";
+	    	var response = xmlhttp.responseText;
+	    	var json = JSON.parse(response);
+	    	var teams;
+	    	for(i=0; i < json.length; i++){
+	    		teams += "<h4>" + json[i].name + "</h4><ul>";
+	    		for(j=0; j < json[i].team.length; j++) {
+	    			teams += "<li>" + json[i].team[j] + "</li>";
+	    		}
+	    		teams += "</ul>";
+	    	}
+	      document.getElementById("teams").innerHTML=teams;
+	    }
+	  }
+	  xmlhttp.open("GET","getSurfers.php?event="+str,true);
+	  xmlhttp.send();
+	  document.getElementById("loader").style.display = "block";
+	}
+
+	var getSurfers = function(){
+		var event = document.getElementById("event");
+		var eventValue = event.options[event.selectedIndex].value;
+
+		showTeams(eventValue);
+	}
+</script>
+</body>
+</html>

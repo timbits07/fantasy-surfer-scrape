@@ -3,6 +3,8 @@
 
 include_once "creds/values.php";
 
+$eventNumber = $_GET['event'];
+
 //login form action url
 $url="http://fantasy.surfermag.com/login/"; 
 $postinfo = "username=".$username."&legacy_password=".$legacy_password."&password=".$password."&persistent=on&submit=Login";
@@ -78,7 +80,6 @@ foreach ($teams_info as &$team) {
   $dom2 = new DOMDocument();
   @$dom2->loadHTML($scraped_website);
   $xpath2 = new DOMXpath($dom2);
-  $eventNumber = 1;
   $eventSurfers = $xpath2->query('//div[@class="history-row"][' . $eventNumber . ']//div[@class="history-surfer"]');
   //print_r($eventSurfers);
   foreach($eventSurfers as $surfer) {
@@ -87,14 +88,8 @@ foreach ($teams_info as &$team) {
   }
 }
 
-print_r($teams_info);
-  
-
-
-
-
-
-
+$result = json_encode($teams_info);
+echo $result;
 
 
 ?>
